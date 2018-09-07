@@ -1,5 +1,8 @@
 package io.phyloyui.client;
 
+import com.neovisionaries.ws.client.*;
+import io.phyloyui.client.domain.Message;
+
 public class MessageClient {
 
     /**
@@ -38,7 +41,39 @@ public class MessageClient {
     }
 
     public void connect(String url) {
-        this.url = url;
+
+        try {
+            new WebSocketFactory()
+                    .setConnectionTimeout(5000)
+                    .createSocket(url)
+                    .addHeader("appKey", appKey)
+                    .addHeader("group", group)
+                    .addListener(new WebSocketAdapter() {
+                        public void onTextMessage(WebSocket websocket, String message) {
+                            Message message1 = new Message();
+                            messageHandler.onTextMessage(message1);
+                        }
+
+                        @Override
+                        public void onError(WebSocket websocket, WebSocketException cause) throws Exception {
+                            Message message1 = new Message();
+                            messageHandler.onError(message1);
+                        }
+                    })
+                    .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
+                    .connect();
+
+        }catch (OpeningHandshakeException e) {
+            // A violation against the WebSocket protocol was detected
+            // during the opening handshake.
+        } catch (HostnameUnverifiedException e) {
+            // The certificate of the peer does not match the expected hostname.
+        } catch (WebSocketException e) {
+            // Failed to establish a WebSocket connection.
+        } catch (Exception e){
+
+        }
+
     }
 
     public String getAppKey() {

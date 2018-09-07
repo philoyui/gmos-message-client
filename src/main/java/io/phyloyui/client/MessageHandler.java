@@ -1,12 +1,11 @@
 package io.phyloyui.client;
 
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketException;
+import io.phyloyui.client.domain.Message;
 
 public interface MessageHandler {
 
-    void onTextMessage(WebSocket websocket, String text);
+    void onTextMessage(Message message);
 
-    void onError(WebSocket websocket, WebSocketException cause);
+    void onError(Message message);
 
 }

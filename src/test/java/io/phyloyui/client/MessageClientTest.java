@@ -2,6 +2,7 @@ package io.phyloyui.client;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
+import io.phyloyui.client.domain.Message;
 import org.junit.Test;
 
 public class MessageClientTest {
@@ -20,12 +21,12 @@ public class MessageClientTest {
         messageClient.handleMessage(new MessageHandler(){
 
             @Override
-            public void onTextMessage(WebSocket websocket, String text) {
+            public void onTextMessage(Message message) {
 
             }
 
             @Override
-            public void onError(WebSocket websocket, WebSocketException cause) {
+            public void onError(Message message) {
 
             }
 
