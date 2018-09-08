@@ -1,7 +1,5 @@
 package io.phyloyui.client;
 
-import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketException;
 import io.phyloyui.client.domain.Message;
 import org.junit.Test;
 
@@ -10,11 +8,11 @@ public class MessageClientTest {
     @Test
     public void test_common(){
 
-        String appKey = "";
+        String appKey = "appkey";
 
-        String secret = "";
+        String secret = "secret";
 
-        String group = "";
+        String group = "group";
 
         MessageClient messageClient = new MessageClient(appKey,secret,group);
 

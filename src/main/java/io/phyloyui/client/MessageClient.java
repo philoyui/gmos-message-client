@@ -1,7 +1,10 @@
 package io.phyloyui.client;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.neovisionaries.ws.client.*;
 import io.phyloyui.client.domain.Message;
+import io.phyloyui.client.domain.SubscribeRequest;
 
 public class MessageClient {
 
@@ -30,6 +33,9 @@ public class MessageClient {
      */
     private MessageHandler messageHandler;
 
+    private Gson gson = new GsonBuilder().create();
+
+
     public MessageClient(String appKey, String secret, String group) {
         this.appKey = appKey;
         this.secret = secret;
@@ -43,11 +49,9 @@ public class MessageClient {
     public void connect(String url) {
 
         try {
-            new WebSocketFactory()
+            WebSocket webSocket = new WebSocketFactory()
                     .setConnectionTimeout(5000)
                     .createSocket(url)
-                    .addHeader("appKey", appKey)
-                    .addHeader("group", group)
                     .addListener(new WebSocketAdapter() {
                         public void onTextMessage(WebSocket websocket, String message) {
                             Message message1 = new Message();
@@ -62,6 +66,10 @@ public class MessageClient {
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connect();
+
+            SubscribeRequest request = new SubscribeRequest(appKey,secret,group);
+
+            webSocket.sendText(gson.toJson(request));
 
         }catch (OpeningHandshakeException e) {
             // A violation against the WebSocket protocol was detected
