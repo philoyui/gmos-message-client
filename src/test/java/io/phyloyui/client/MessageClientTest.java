@@ -33,7 +33,7 @@ public class MessageClientTest {
         messageClient.connect("ws://localhost:8080/endpoints");
 
         try {
-            Thread.sleep(100000);
+            Thread.sleep(1000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

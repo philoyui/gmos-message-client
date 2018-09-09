@@ -1,10 +1,12 @@
 package io.phyloyui.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.neovisionaries.ws.client.*;
+import io.phyloyui.client.domain.ConnectStatus;
 import io.phyloyui.client.domain.Message;
-import io.phyloyui.client.domain.SubscribeRequest;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public class MessageClient {
 
@@ -33,9 +35,14 @@ public class MessageClient {
      */
     private MessageHandler messageHandler;
 
+
     private WebSocket webSocket;
 
-    private Gson gson = new GsonBuilder().create();
+    private ConnectStatus mConnectStatus = ConnectStatus.CONNECT_DISCONNECT;
+
+    private void setConnectStatus(ConnectStatus connectStatus) {
+        mConnectStatus = connectStatus;
+    }
 
     public MessageClient(String appKey, String secret, String group) {
         this.appKey = appKey;
@@ -58,6 +65,12 @@ public class MessageClient {
                     .addListener(new WebSocketAdapter() {
 
                         @Override
+                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+                            setConnectStatus(ConnectStatus.CONNECT_SUCCESS);
+                            super.onConnected(websocket, headers);
+                        }
+
+                        @Override
                         public void onTextMessage(WebSocket websocket, String response) {
                             Message message = new Message();
                             message.setContent(response);
@@ -66,49 +79,67 @@ public class MessageClient {
 
                         @Override
                         public void onError(WebSocket websocket, WebSocketException cause) {
-                            Message message = new Message();
-                            message.setContent("竟然报错了");
-                            messageHandler.onError(message);
+                            System.out.println("On Error...");
                         }
 
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
-                            Message message = new Message();
-                            message.setContent("服务器重连");
-                            messageHandler.onError(message);
+                            setConnectStatus(ConnectStatus.CONNECT_DISCONNECT);
+                            System.out.println("连接断开...");
+                            reconnect();
                         }
 
                         @Override
                         public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                            setConnectStatus(ConnectStatus.CONNECT_FAIL);
                             super.onConnectError(websocket, exception);
                         }
-
                     })
-                    .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .connectAsynchronously();
+                    .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE);
 
-            SubscribeRequest request = new SubscribeRequest(appKey,secret,group);
-
-            webSocket.sendText(gson.toJson(request));
 
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("异常中...");
         }
+
+        startToConnect();
+        setConnectStatus(ConnectStatus.CONNECTING);
 
     }
 
-//    public void reconnect() {
-//        if (webSocket != null && !webSocket.isOpen() && getConnectStatus() != ConnectStatus.CONNECTING) {
-//            TimerTask mReconnectTimerTask = new TimerTask() {
-//                @Override
-//                public void run() {
-//                    connect();
-//                }
-//            };
-//            mReconnectTimer.schedule(mReconnectTimerTask, DEFAULT_SOCKET_RECONNECTINTERVAL);
-//        }
-//    }
+    private void startToConnect() {
+        try {
+            webSocket.recreate().connect();
+        } catch (IOException e) {
+            System.out.println("IO异常中...");
+            reconnect();
+        } catch (WebSocketException e) {
+            System.out.println("WebSocketException异常中...");
+            reconnect();
+        }
+    }
 
+    public void reconnect() {
+
+        if (webSocket != null && !webSocket.isOpen() && getConnectStatus() != ConnectStatus.CONNECTING) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            startToConnect();
+
+
+            System.out.println("重连中...");
+        }
+
+
+    }
+
+    public ConnectStatus getConnectStatus() {
+        return mConnectStatus;
+    }
 
     public String getAppKey() {
         return appKey;
