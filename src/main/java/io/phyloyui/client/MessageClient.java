@@ -33,8 +33,9 @@ public class MessageClient {
      */
     private MessageHandler messageHandler;
 
-    private Gson gson = new GsonBuilder().create();
+    private WebSocket webSocket;
 
+    private Gson gson = new GsonBuilder().create();
 
     public MessageClient(String appKey, String secret, String group) {
         this.appKey = appKey;
@@ -48,41 +49,66 @@ public class MessageClient {
 
     public void connect(String url) {
 
+        String webSocketUrl = url + "?appKey=" + appKey;
+
         try {
-            WebSocket webSocket = new WebSocketFactory()
+            webSocket = new WebSocketFactory()
                     .setConnectionTimeout(5000)
-                    .createSocket(url)
+                    .createSocket(webSocketUrl)
                     .addListener(new WebSocketAdapter() {
-                        public void onTextMessage(WebSocket websocket, String message) {
-                            Message message1 = new Message();
-                            messageHandler.onTextMessage(message1);
+
+                        @Override
+                        public void onTextMessage(WebSocket websocket, String response) {
+                            Message message = new Message();
+                            message.setContent(response);
+                            messageHandler.onTextMessage(message);
                         }
 
                         @Override
-                        public void onError(WebSocket websocket, WebSocketException cause) throws Exception {
-                            Message message1 = new Message();
-                            messageHandler.onError(message1);
+                        public void onError(WebSocket websocket, WebSocketException cause) {
+                            Message message = new Message();
+                            message.setContent("竟然报错了");
+                            messageHandler.onError(message);
                         }
+
+                        @Override
+                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                            Message message = new Message();
+                            message.setContent("服务器重连");
+                            messageHandler.onError(message);
+                        }
+
+                        @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                            super.onConnectError(websocket, exception);
+                        }
+
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .connect();
+                    .connectAsynchronously();
 
             SubscribeRequest request = new SubscribeRequest(appKey,secret,group);
 
             webSocket.sendText(gson.toJson(request));
 
-        }catch (OpeningHandshakeException e) {
-            // A violation against the WebSocket protocol was detected
-            // during the opening handshake.
-        } catch (HostnameUnverifiedException e) {
-            // The certificate of the peer does not match the expected hostname.
-        } catch (WebSocketException e) {
-            // Failed to establish a WebSocket connection.
         } catch (Exception e){
-
+            e.printStackTrace();
         }
 
     }
+
+//    public void reconnect() {
+//        if (webSocket != null && !webSocket.isOpen() && getConnectStatus() != ConnectStatus.CONNECTING) {
+//            TimerTask mReconnectTimerTask = new TimerTask() {
+//                @Override
+//                public void run() {
+//                    connect();
+//                }
+//            };
+//            mReconnectTimer.schedule(mReconnectTimerTask, DEFAULT_SOCKET_RECONNECTINTERVAL);
+//        }
+//    }
+
 
     public String getAppKey() {
         return appKey;

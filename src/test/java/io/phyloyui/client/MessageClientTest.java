@@ -8,11 +8,11 @@ public class MessageClientTest {
     @Test
     public void test_common(){
 
-        String appKey = "appkey";
+        String appKey = "appkey122112";
 
-        String secret = "secret";
+        String secret = "secret111222";
 
-        String group = "group";
+        String group = "default_group";
 
         MessageClient messageClient = new MessageClient(appKey,secret,group);
 
@@ -20,17 +20,23 @@ public class MessageClientTest {
 
             @Override
             public void onTextMessage(Message message) {
-
+                System.out.println( "--success--" + message.getContent());
             }
 
             @Override
             public void onError(Message message) {
-
+                System.out.println( "--error--" + message.getContent());
             }
 
         });
 
-        messageClient.connect("ws://gw.gome.com.cn");
+        messageClient.connect("ws://localhost:8080/endpoints");
+
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
