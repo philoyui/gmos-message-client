@@ -86,7 +86,7 @@ public class MessageClient {
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
                             setConnectStatus(ConnectStatus.CONNECT_DISCONNECT);
                             System.out.println("连接断开...");
-                            reconnect();
+                            startToConnect();
                         }
 
                         @Override
@@ -108,32 +108,23 @@ public class MessageClient {
     }
 
     private void startToConnect() {
-        try {
-            webSocket.recreate().connect();
-        } catch (IOException e) {
-            System.out.println("IO异常中...");
-            reconnect();
-        } catch (WebSocketException e) {
-            System.out.println("WebSocketException异常中...");
-            reconnect();
-        }
-    }
 
-    public void reconnect() {
+        while(true){
+            try {
+                webSocket.recreate().connect();
+                break;
+            } catch (IOException e) {
+                System.out.println("IO异常中...");
+            } catch (WebSocketException e) {
+                System.out.println("重新连接中...");
+            }
 
-        if (webSocket != null && !webSocket.isOpen() && getConnectStatus() != ConnectStatus.CONNECTING) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            startToConnect();
-
-
-            System.out.println("重连中...");
         }
-
 
     }
 
