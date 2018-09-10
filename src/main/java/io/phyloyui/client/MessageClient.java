@@ -1,10 +1,8 @@
 package io.phyloyui.client;
 
 import com.neovisionaries.ws.client.*;
-import io.phyloyui.client.domain.ConnectStatus;
 import io.phyloyui.client.domain.Message;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,14 +33,12 @@ public class MessageClient {
      */
     private MessageHandler messageHandler;
 
-
     private WebSocket webSocket;
 
-    private ConnectStatus mConnectStatus = ConnectStatus.CONNECT_DISCONNECT;
-
-    private void setConnectStatus(ConnectStatus connectStatus) {
-        mConnectStatus = connectStatus;
-    }
+    /**
+     * 上次链接时间
+     */
+    private long lastConnectedTime;
 
     public MessageClient(String appKey, String secret, String group) {
         this.appKey = appKey;
@@ -63,10 +59,8 @@ public class MessageClient {
                     .setConnectionTimeout(5000)
                     .createSocket(webSocketUrl)
                     .addListener(new WebSocketAdapter() {
-
                         @Override
                         public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                            setConnectStatus(ConnectStatus.CONNECT_SUCCESS);
                             super.onConnected(websocket, headers);
                         }
 
@@ -84,52 +78,43 @@ public class MessageClient {
 
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
-                            setConnectStatus(ConnectStatus.CONNECT_DISCONNECT);
                             System.out.println("连接断开...");
-                            startToConnect();
+                            reconnect();
                         }
 
                         @Override
                         public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
-                            setConnectStatus(ConnectStatus.CONNECT_FAIL);
                             super.onConnectError(websocket, exception);
+                            reconnect();
                         }
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE);
-
 
         } catch (Exception e){
             System.out.println("异常中...");
         }
 
-        startToConnect();
-        setConnectStatus(ConnectStatus.CONNECTING);
+        webSocket.connectAsynchronously();
 
+        lastConnectedTime = System.currentTimeMillis();
     }
 
-    private void startToConnect() {
+
+    private void reconnect() {
 
         while(true){
             try {
-                webSocket.recreate().connect();
-                break;
-            } catch (IOException e) {
-                System.out.println("IO异常中...");
-            } catch (WebSocketException e) {
+                if (System.currentTimeMillis() - lastConnectedTime > 20000){
+                    this.webSocket.recreate().connect();
+                    lastConnectedTime = System.currentTimeMillis();
+                    break;
+                }
+            } catch (Exception e) {
                 System.out.println("重新连接中...");
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                lastConnectedTime = System.currentTimeMillis();
             }
         }
 
-    }
-
-    public ConnectStatus getConnectStatus() {
-        return mConnectStatus;
     }
 
     public String getAppKey() {

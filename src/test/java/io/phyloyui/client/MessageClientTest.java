@@ -8,7 +8,7 @@ public class MessageClientTest {
     @Test
     public void test_common(){
 
-        String appKey = "appkey122112";
+        String appKey = "appkey122fgfg112";
 
         String secret = "secret111222";
 
@@ -21,11 +21,6 @@ public class MessageClientTest {
             @Override
             public void onTextMessage(Message message) {
                 System.out.println( "--success--" + message.getContent());
-            }
-
-            @Override
-            public void onError(Message message) {
-                System.out.println( "--error--" + message.getContent());
             }
 
         });

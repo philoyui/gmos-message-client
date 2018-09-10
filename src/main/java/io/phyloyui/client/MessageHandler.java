@@ -6,6 +6,4 @@ public interface MessageHandler {
 
     void onTextMessage(Message message);
 
-    void onError(Message message);
-
 }
