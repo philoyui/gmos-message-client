@@ -52,7 +52,7 @@ public class MessageClient {
 
     public void connect(String url) {
 
-        String webSocketUrl = url + "?appKey=" + appKey;
+        final String webSocketUrl = url + "?appKey=" + appKey;
 
         try {
             webSocket = new WebSocketFactory()
@@ -73,12 +73,13 @@ public class MessageClient {
 
                         @Override
                         public void onError(WebSocket websocket, WebSocketException cause) {
-                            System.out.println("On Error...");
+                            cause.printStackTrace();
+                            System.out.println("On Error..." + cause.getLocalizedMessage());
                         }
 
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
-                            System.out.println("连接断开...");
+                            System.out.println("建立连接失败...");
                             reconnect();
                         }
 
