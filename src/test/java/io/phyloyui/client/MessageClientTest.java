@@ -5,9 +5,10 @@ import org.junit.Test;
 
 public class MessageClientTest {
 
+    @Test
     public void test_common(){
 
-        String appKey = "appkey122fgfg112";
+        String appKey = "appkey122112";
 
         String secret = "secret111222";
 

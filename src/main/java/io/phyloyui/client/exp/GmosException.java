@@ -6,4 +6,7 @@ public class GmosException extends RuntimeException{
         super(message,e);
     }
 
+    public GmosException(String message) {
+        super(message);
+    }
 }
