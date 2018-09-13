@@ -1,16 +1,18 @@
 package io.phyloyui.client.thread;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.neovisionaries.ws.client.*;
 import io.phyloyui.client.common.SignUtils;
 import io.phyloyui.client.conf.SubscribeConfig;
 import io.phyloyui.client.domain.Message;
+import io.phyloyui.client.domain.ResponseEntity;
 import io.phyloyui.client.exp.GmosException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -44,6 +46,9 @@ public class ReceiverThread implements Runnable{
      */
     private SubscribeConfig subscribeConfig;
 
+
+    private Gson gson = new GsonBuilder().create();
+
     public ReceiverThread(SubscribeConfig subscribeConfig) {
         this.subscribeConfig = subscribeConfig;
     }
@@ -51,21 +56,15 @@ public class ReceiverThread implements Runnable{
     @Override
     public void run() {
 
-        //使用appkey和secret请求换取token
-
-        String token = fetchToken(subscribeConfig);
-
-        final String webSocketUrl = subscribeConfig.getSubscribeUrl() + "?token=" + token;
-
         try {
+
+            String token = fetchToken(subscribeConfig);
+            String webSocketUrl = buildWebSocketUrl(token);
+
             webSocket = new WebSocketFactory()
                     .setConnectionTimeout(5000)
                     .createSocket(webSocketUrl)
                     .addListener(new WebSocketAdapter() {
-                        @Override
-                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
-                            super.onConnected(websocket, headers);
-                        }
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String response) {
@@ -75,14 +74,8 @@ public class ReceiverThread implements Runnable{
                         }
 
                         @Override
-                        public void onError(WebSocket websocket, WebSocketException cause) {
-                            cause.printStackTrace();
-                            System.out.println("On Error..." + cause.getLocalizedMessage());
-                        }
-
-                        @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
-                            System.err.println("订阅平台消息网关失败，请确认应用参数是否正确...");
+                            System.err.println("订阅平台消息网关连接已断开...");
                             reconnect();
                         }
 
@@ -99,37 +92,64 @@ public class ReceiverThread implements Runnable{
 
                     lastConnectedTime = System.currentTimeMillis();
 
-        } catch (Exception e){
+        } catch (GmosException e){
+            System.err.println(e.getMessage());
+            reconnect();
+        }catch (Exception e){
             reconnect();
         }
 
     }
 
+    private String buildWebSocketUrl(String token) {
+        return subscribeConfig.getSubscribeUrl() + "?token=" + token;
+    }
+
+
+    /**
+     *
+     * 使用appkey和secret请求换取token
+     *
+     * @param subscribeConfig
+     * @return
+     */
     private String fetchToken(SubscribeConfig subscribeConfig) {
 
-        String subscribeUrl = subscribeConfig.getSubscribeUrl();
+        String tokenObtainUrl = buildTokenUrl(subscribeConfig);
 
-        if(subscribeUrl==null || "".equalsIgnoreCase(subscribeUrl)){
-            throw new GmosException("请输入subscribeUrl");
+        String responseContent = requestToken(subscribeConfig, tokenObtainUrl);
+
+        ResponseEntity<String> responseEntity = gson.fromJson(responseContent, ResponseEntity.class);
+        if(responseEntity.isSuccessResponse()){
+            return responseEntity.getObject();
+        }else{
+            throw new GmosException(responseEntity.getMessage());
         }
 
-        String tokenObtainUrl = subscribeUrl.replace("ws://", "http://").replace("/endpoints", "/router/ws/token");
+    }
 
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(tokenObtainUrl);
 
-        List <NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-        nameValuePairs.add(new BasicNameValuePair("appKey", subscribeConfig.getAppKey()));
-        nameValuePairs.add(new BasicNameValuePair("groupName", subscribeConfig.getGroup()));
-        nameValuePairs.add(new BasicNameValuePair("version", subscribeConfig.getVersion()));
-        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis())));
-        nameValuePairs.add(new BasicNameValuePair("sign", signRequest(subscribeConfig)));
+    /**
+     * 从消息网关获取Token
+     * @param subscribeConfig
+     * @return
+     */
+    private String requestToken(SubscribeConfig subscribeConfig, String tokenObtainUrl) {
+        String responseContent = "";
 
         try {
+            CloseableHttpClient httpclient = HttpClients.createDefault();
+            HttpPost httpPost = new HttpPost(tokenObtainUrl);
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            nameValuePairs.add(new BasicNameValuePair("appKey", subscribeConfig.getAppKey()));
+            nameValuePairs.add(new BasicNameValuePair("groupName", subscribeConfig.getGroup()));
+            nameValuePairs.add(new BasicNameValuePair("version", subscribeConfig.getVersion()));
+            nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis())));
+            nameValuePairs.add(new BasicNameValuePair("sign", signRequest(subscribeConfig)));
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             CloseableHttpResponse response = httpclient.execute(httpPost);
-            HttpEntity httpEntity= response.getEntity();
-            String strResult= EntityUtils.toString(httpEntity);
+            HttpEntity httpEntity = response.getEntity();
+            responseContent= EntityUtils.toString(httpEntity);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
@@ -137,7 +157,25 @@ public class ReceiverThread implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return responseContent;
+    }
+
+
+    /**
+     *
+     * 构建Token获取链接
+     *
+     * @param subscribeConfig
+     * @return
+     */
+    private String buildTokenUrl(SubscribeConfig subscribeConfig) {
+        String subscribeUrl = subscribeConfig.getSubscribeUrl();
+
+        if(subscribeUrl==null || "".equalsIgnoreCase(subscribeUrl)){
+            throw new GmosException("请输入subscribeUrl");
+        }
+
+        return subscribeUrl.replace("ws://", "http://").replace("/endpoints", "/router/ws/token");
     }
 
     /**
@@ -154,6 +192,10 @@ public class ReceiverThread implements Runnable{
         return SignUtils.sign(parameters,subscribeConfig.getSecret());
     }
 
+
+    /**
+     * 重新连接
+     */
     private void reconnect() {
 
         while(true){
