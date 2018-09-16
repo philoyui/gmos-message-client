@@ -1,7 +1,7 @@
-package io.phyloyui.client.conf;
+package cn.com.gome.cloud.gmos.message.client.conf;
 
-import io.phyloyui.client.MessageHandler;
-import io.phyloyui.client.common.GlobalSettings;
+import cn.com.gome.cloud.gmos.message.client.MessageHandler;
+import cn.com.gome.cloud.gmos.message.client.common.GlobalSettings;
 
 /**
  *

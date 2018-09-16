@@ -1,4 +1,4 @@
-package io.phyloyui.client.common;
+package cn.com.gome.cloud.gmos.message.client.common;
 
 public class GlobalSettings {
 

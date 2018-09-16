@@ -1,7 +1,7 @@
-package io.phyloyui.client.domain;
+package cn.com.gome.cloud.gmos.message.client.domain;
 
-import io.phyloyui.client.common.GlobalSettings;
-import io.phyloyui.client.common.SignUtils;
+import cn.com.gome.cloud.gmos.message.client.common.GlobalSettings;
+import cn.com.gome.cloud.gmos.message.client.common.SignUtils;
 
 import java.io.Serializable;
 import java.util.Map;

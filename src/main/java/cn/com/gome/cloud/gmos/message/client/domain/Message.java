@@ -1,4 +1,4 @@
-package io.phyloyui.client.domain;
+package cn.com.gome.cloud.gmos.message.client.domain;
 
 import java.io.Serializable;
 import java.util.Date;

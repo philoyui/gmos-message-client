@@ -1,6 +1,6 @@
-package io.phyloyui.client.common;
+package cn.com.gome.cloud.gmos.message.client.common;
 
-import io.phyloyui.client.exp.GmosException;
+import cn.com.gome.cloud.gmos.message.client.exp.GmosException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;

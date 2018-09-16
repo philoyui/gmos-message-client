@@ -1,7 +1,7 @@
-package io.phyloyui.client;
+package cn.com.gome.cloud.gmos.message.client;
 
-import io.phyloyui.client.domain.Message;
-import io.phyloyui.client.domain.MethodStatus;
+import cn.com.gome.cloud.gmos.message.client.domain.Message;
+import cn.com.gome.cloud.gmos.message.client.domain.MethodStatus;
 import org.junit.Test;
 
 public class MessageClientTest {
