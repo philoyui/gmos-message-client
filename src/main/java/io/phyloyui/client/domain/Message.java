@@ -9,7 +9,7 @@ public class Message implements Serializable {
     /**
      * 消息的ID
      */
-    private Long id;
+    private String id;
 
     /**
      * 消息所属的主题
@@ -45,14 +45,6 @@ public class Message implements Serializable {
      * 消息信息
      */
     private Map<String, Object> keyValues;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getTopic() {
         return topic;
@@ -108,5 +100,13 @@ public class Message implements Serializable {
 
     public void setKeyValues(Map<String, Object> keyValues) {
         this.keyValues = keyValues;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

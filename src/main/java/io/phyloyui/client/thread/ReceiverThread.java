@@ -6,6 +6,8 @@ import com.neovisionaries.ws.client.*;
 import io.phyloyui.client.common.SignUtils;
 import io.phyloyui.client.conf.SubscribeConfig;
 import io.phyloyui.client.domain.Message;
+import io.phyloyui.client.domain.AckResponse;
+import io.phyloyui.client.domain.MethodStatus;
 import io.phyloyui.client.domain.ResponseEntity;
 import io.phyloyui.client.exp.GmosException;
 import org.apache.http.HttpEntity;
@@ -68,9 +70,15 @@ public class ReceiverThread implements Runnable{
 
                         @Override
                         public void onTextMessage(WebSocket websocket, String response) {
-                            Message message = new Message();
-                            message.setContent(response);
-                            subscribeConfig.getMessageHandler().onTextMessage(message);
+                            MethodStatus methodStatus = new MethodStatus();
+
+                            Message message = gson.fromJson(response, Message.class);
+                            message.setKeyValues(gson.fromJson(message.getContent(),Map.class));
+                            subscribeConfig.getMessageHandler().onTextMessage(message,methodStatus);
+
+                            if(methodStatus.isSuccess()){
+                                websocket.sendText(gson.toJson(new AckResponse(message.getId())));
+                            }
                         }
 
                         @Override

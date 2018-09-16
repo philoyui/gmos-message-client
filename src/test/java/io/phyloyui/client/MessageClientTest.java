@@ -1,6 +1,7 @@
 package io.phyloyui.client;
 
 import io.phyloyui.client.domain.Message;
+import io.phyloyui.client.domain.MethodStatus;
 import org.junit.Test;
 
 public class MessageClientTest {
@@ -19,8 +20,12 @@ public class MessageClientTest {
         messageClient.handleMessage(new MessageHandler(){
 
             @Override
-            public void onTextMessage(Message message) {
-                System.out.println( "--success--" + message.getContent());
+            public void onTextMessage(Message message, MethodStatus methodStatus) {
+                try {
+                    System.out.println("--success--" + message.getContent());
+                }catch (Exception e){
+                    methodStatus.fail();
+                }
             }
 
         });
