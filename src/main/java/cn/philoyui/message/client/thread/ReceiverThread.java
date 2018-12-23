@@ -1,15 +1,15 @@
-package cn.com.gome.cloud.gmos.message.client.thread;
+package cn.philoyui.message.client.thread;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.neovisionaries.ws.client.*;
-import cn.com.gome.cloud.gmos.message.client.common.SignUtils;
-import cn.com.gome.cloud.gmos.message.client.conf.SubscribeConfig;
-import cn.com.gome.cloud.gmos.message.client.domain.Message;
-import cn.com.gome.cloud.gmos.message.client.domain.AckResponse;
-import cn.com.gome.cloud.gmos.message.client.domain.MethodStatus;
-import cn.com.gome.cloud.gmos.message.client.domain.ResponseEntity;
-import cn.com.gome.cloud.gmos.message.client.exp.GmosException;
+import cn.philoyui.message.client.common.SignUtils;
+import cn.philoyui.message.client.conf.SubscribeConfig;
+import cn.philoyui.message.client.domain.Message;
+import cn.philoyui.message.client.domain.AckResponse;
+import cn.philoyui.message.client.domain.MethodStatus;
+import cn.philoyui.message.client.domain.ResponseEntity;
+import cn.philoyui.message.client.exp.GmosException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;

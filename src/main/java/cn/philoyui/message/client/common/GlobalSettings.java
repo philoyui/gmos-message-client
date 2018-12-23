@@ -1,4 +1,4 @@
-package cn.com.gome.cloud.gmos.message.client.common;
+package cn.philoyui.message.client.common;
 
 public class GlobalSettings {
 

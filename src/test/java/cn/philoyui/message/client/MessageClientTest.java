@@ -1,7 +1,7 @@
-package cn.com.gome.cloud.gmos.message.client;
+package cn.philoyui.message.client;
 
-import cn.com.gome.cloud.gmos.message.client.domain.Message;
-import cn.com.gome.cloud.gmos.message.client.domain.MethodStatus;
+import cn.philoyui.message.client.domain.Message;
+import cn.philoyui.message.client.domain.MethodStatus;
 import org.junit.Test;
 
 public class MessageClientTest {

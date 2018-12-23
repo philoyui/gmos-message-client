@@ -1,7 +1,7 @@
-package cn.com.gome.cloud.gmos.message.client;
+package cn.philoyui.message.client;
 
-import cn.com.gome.cloud.gmos.message.client.conf.SubscribeConfig;
-import cn.com.gome.cloud.gmos.message.client.thread.ReceiverThread;
+import cn.philoyui.message.client.conf.SubscribeConfig;
+import cn.philoyui.message.client.thread.ReceiverThread;
 
 public class MessageClient {
 

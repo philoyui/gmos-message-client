@@ -1,7 +1,7 @@
-package cn.com.gome.cloud.gmos.message.client.conf;
+package cn.philoyui.message.client.conf;
 
-import cn.com.gome.cloud.gmos.message.client.MessageHandler;
-import cn.com.gome.cloud.gmos.message.client.common.GlobalSettings;
+import cn.philoyui.message.client.MessageHandler;
+import cn.philoyui.message.client.common.GlobalSettings;
 
 /**
  *

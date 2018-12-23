@@ -1,4 +1,4 @@
-package cn.com.gome.cloud.gmos.message.client.exp;
+package cn.philoyui.message.client.exp;
 
 public class GmosException extends RuntimeException{
 

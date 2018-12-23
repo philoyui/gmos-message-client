@@ -1,4 +1,4 @@
-package cn.com.gome.cloud.gmos.message.client.domain;
+package cn.philoyui.message.client.domain;
 
 import java.io.Serializable;
 
